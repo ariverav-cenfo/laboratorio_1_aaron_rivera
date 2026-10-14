@@ -1,2 +1,51 @@
 services:
-  
+  postgres:
+    image: postgres:16-alpine3.23
+    container_name: lab_postgres_db
+    environment:
+      POSTGRES_USER: "${DB_USER}"
+      POSTGRES_PASSWORD: "${DB_PASSWORD}"
+      POSTGRES_DB: labDB
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./postgres/init:/docker-entrypoint-initdb.d:ro
+    #dependency failed to start: container lab_postgres_db has no healthcheck configured
+    healthcheck:
+      test: ["CMD-SHELL","pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 20s
+  # parte del setup de keycloak, segun instrucciones en clase, no tocar *mucho*
+
+  # Servidor de identidad (Auth broker). Emite los tokens JWT que la API valida.
+  # Consola de administración: http://localhost:8180  (admin / admin)
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.4
+    container_name: keycloak
+    # start.sh ejecuta "kc.sh start-dev --import-realm":
+    #   start-dev: modo desarrollo (HTTP, sin cache de temas, BD embebida)
+    #   --import-realm: importa los realms en /opt/keycloak/data/import al arrancar
+    # y además permite HTTP en el realm master para poder entrar a la consola.
+    entrypoint: ["/bin/bash", "/opt/keycloak/start.sh"]
+    environment:
+      #Base de keycloak para almacenar los usuarios del realm
+      KC_BOOTSTRAP_ADMIN_USERNAME: admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: admin
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://postgres:5432/keycloak
+      KC_DB_USERNAME: keycloak
+      KC_DB_PASSWORD: keycloak
+    ports:
+      - "8180:8080"
+    volumes:
+      - ./keycloak/realm-laboratorio.json:/opt/keycloak/data/import/realm-laboratorio.json:ro
+      - ./keycloak/start.sh:/opt/keycloak/start.sh:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+volumes:
+  postgres_data:

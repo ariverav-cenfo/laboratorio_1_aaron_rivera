@@ -1,0 +1,25 @@
+spring:
+  application:
+    name: laboratorio_1_aaron_rivera
+
+  datasource:
+    url: jdbc:postgresql://127.0.0.1:5433/labDB
+    username: Lab1DBA
+    password: Lab1pass
+  flyway:
+    url: ${spring.datasource.url}
+    user: ${spring.datasource.username}
+    password: ${spring.datasource.password}
+  jpa:
+    hibernate:
+      ddl-auto: validate
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8180/realms/laboratorio
+
+keycloak:
+  client-id: laboratorio-api
+  token-uri: ${spring.security.oauth2.resourceserver.jwt.issuer-uri}/protocol/openid-connect/token

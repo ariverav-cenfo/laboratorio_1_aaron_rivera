@@ -1,0 +1,126 @@
+{
+  "info": {
+    "name": "laboratorio 1",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {"key": "token", "value": "{{token}}", "type": "string"}
+    ]
+  },
+  "variable": [
+    {"key": "baseUrl", "value": "http://localhost:8080"},
+    {"key": "token", "value": ""},
+    {"key": "categoria_id", "value": ""},
+    {"key": "id_producto", "value": ""}
+  ],
+  "item": [
+    {"name": "admin login", "request": {
+      "method": "POST", "URL": "{{baseUrl}}/api/v1/auth/login","header": [
+        {"key": "Content-Type", "value": "application/json"}
+      ],
+      "body": {"mode": "raw", "raw": "{\"username\":\"Admin1\",\"password\":\"Admin123\"}"},
+      "auth": {"type": "noauth"}
+    },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": ["pm.collectionVariables.set(\"token\",pm.response.json().access_token);"]
+          }
+        }
+      ]
+    },
+    {
+      "name": "crear categoria",
+      "request": {
+        "method": "POST", "url": "{{baseUrl}}/api/v1/categoria","header": [
+          {"key":"Content-Type","value": "application/json"}
+        ],
+        "body": {
+          "mode": "raw", "raw": "{\"NombreCategoria\": \"Pinturas\", \"DescripcionCategoria\": \"Warhammer tone pro\"}"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": ["pm.collectionVariables.set(\"CategoriaId\",pm.response.json().id)];"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Listar categorias",
+      "request": {"method": "GET", "url":"{{baseUrl}}/api/v1/categoria" }
+    },
+    {
+      "name": "Actualizar categoria",
+      "request": {
+        "method": "PUT", "url": "{{baseUrl}}/api/v1/categoria/{{CategoriaId}}",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw", "raw": "{\"NombreCategoria\": \"Pinturas\",\"DescripcionCategoria\":\"Army painter speed paints\"}"
+        }
+      }
+    },
+    {
+      "name": "Eliminar cateogira",
+      "request": {
+        "method": "DELETE", "url":"{{baseUrl}}/api/v1/categoria/{{CategoriaId}}"
+      }
+    },
+    {
+      "name": "crear producto",
+      "request": {
+        "method": "POST", "url": "{{baseUrl}}/api/v1/productos","header": [
+          {"key":"Content-Type","value": "application/json"}
+        ],
+        "body": {
+          "mode": "raw", "raw": "{\"NombreProducto\": \"Ultramarine Blue\", \"DescrcipcionProducto\": \"Serie 5 tonos ultramarine blue\", \"Precio\": \"5000\", \"Stock\": \"30\", \"CategoriaId\": \"1\"}"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": ["pm.collectionVariables.set(\"IdProducto\",pm.response.json().id)];"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Listar productos",
+      "request": {"method": "GET", "url":"{{baseUrl}}/api/v1/productos" }
+    },
+    {
+      "name": "Actualizar producto",
+      "request": {
+        "method": "PUT", "url": "{{baseUrl}}/api/v1/productos/{{IdProducto}}",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw", "raw": "{\"NombreProducto\": \"Bone white\", \"DescrcipcionProducto\": \"Serie 5 tonos ultramarine blue\", \"Precio\": \"15000\", \"Stock\": \"10\", \"CategoriaId\": \"1\"}"
+        }
+      }
+    },
+    {
+      "name": "Eliminar producto",
+      "request": {
+        "method": "DELETE", "url":"{{baseUrl}}/api/v1/productos/{{IdProducto}}"
+      }
+    }
+  ]
+}
